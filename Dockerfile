@@ -1,4 +1,4 @@
-ARG CUDA_VERSION=13.0.1
+ARG CUDA_VERSION=12.8.1
 
 FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu24.04 AS builder
 
@@ -60,4 +60,3 @@ HEALTHCHECK --interval=10s --timeout=5s --start-period=30m --retries=3 \
     CMD curl --fail --silent --show-error http://127.0.0.1:${PORT}/ping >/dev/null || exit 1
 
 ENTRYPOINT ["/opt/ds4/entrypoint.sh"]
-

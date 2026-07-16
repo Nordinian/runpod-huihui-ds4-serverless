@@ -7,7 +7,7 @@ This repository builds a RunPod Load Balancer Serverless worker for:
 - Runtime: `antirez/ds4` at commit
   `80ebbc396aee40eedc1d829222f3362d10fa4c6c`
 - GPU: one NVIDIA RTX PRO 6000 Blackwell, 96GB
-- CUDA: 13.0.1, compiled for `sm_120`
+- CUDA: 12.8.1, compiled for `sm_120`
 - Context: 131,072 tokens
 
 The published worker image is:
@@ -42,7 +42,7 @@ Use a Load Balancer endpoint with these settings:
 | Container port | 8000 |
 | Health path | `/ping` |
 | Model cache | `huihui-ai/Huihui-DeepSeek-V4-Flash-abliterated-ds4-GGUF` |
-| CUDA minimum | 13.0 |
+| CUDA minimum | 12.8 |
 | Max concurrency | 1 |
 
 RunPod currently caches every file in a Hugging Face repository, so this model
