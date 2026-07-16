@@ -6,7 +6,7 @@ This repository builds a RunPod Load Balancer Serverless worker for:
 - File: `Huihui-DeepSeek-V4-Flash-BF16-abliterated-ds4-Q2.gguf`
 - Runtime: `antirez/ds4` at commit
   `80ebbc396aee40eedc1d829222f3362d10fa4c6c`
-- GPU: one NVIDIA RTX PRO 6000 Blackwell Server Edition, 96GB
+- GPU: one NVIDIA RTX PRO 6000 Blackwell, 96GB
 - CUDA: 13.0.1, compiled for `sm_120`
 - Context: 131,072 tokens
 
@@ -33,7 +33,7 @@ Use a Load Balancer endpoint with these settings:
 
 | Setting | Value |
 | --- | --- |
-| GPU | NVIDIA RTX PRO 6000 Blackwell Server Edition |
+| GPU priority | Server Edition, Workstation Edition, Max-Q Workstation Edition |
 | GPU count | 1 |
 | Active workers | 0 |
 | Max workers | 1 |
