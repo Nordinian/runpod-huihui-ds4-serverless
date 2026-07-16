@@ -1,4 +1,4 @@
 .DS_Store
+.flash/
 __pycache__/
 *.pyc
-
