@@ -10,6 +10,12 @@ This repository builds a RunPod Load Balancer Serverless worker for:
 - CUDA: 13.0.1, compiled for `sm_120`
 - Context: 131,072 tokens
 
+The published worker image is:
+
+```text
+ghcr.io/nordinian/runpod-huihui-ds4-serverless:latest
+```
+
 The worker exposes:
 
 - `GET /v1/models`
@@ -73,4 +79,3 @@ RunPod authenticates requests at the Load Balancer with:
 ```text
 Authorization: Bearer RUNPOD_API_KEY
 ```
-
