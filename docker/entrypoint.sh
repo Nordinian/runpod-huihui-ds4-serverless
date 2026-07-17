@@ -55,9 +55,9 @@ resolve_model_path() {
 MODEL_PATH="$(resolve_model_path || true)"
 if [[ -z "${MODEL_PATH}" ]]; then
     log "Q2 model file was not found."
-    log "Expected RunPod cached model: ${MODEL_ID}@${MODEL_REVISION}"
-    log "Expected file: ${MODEL_FILE}"
-    log "Attach the Hugging Face model cache to this endpoint before starting a worker."
+    log "Expected persistent file: /runpod-volume/model/${MODEL_FILE}"
+    log "Cached-model fallback: ${MODEL_ID}@${MODEL_REVISION}"
+    log "Attach the model Network Volume or Hugging Face model cache before starting a worker."
     exit 1
 fi
 
@@ -113,4 +113,3 @@ set -e
 log "A serving process exited with status ${status}; stopping the worker."
 shutdown
 exit "${status}"
-

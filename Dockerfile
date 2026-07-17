@@ -50,6 +50,7 @@ ENV MODEL_ID=kinson888/Huihui-DeepSeek-V4-Flash-Q2-ds4-GGUF \
     CTX_SIZE=131072 \
     KV_DISK_DIR=/tmp/ds4-kv \
     KV_DISK_SPACE_MB=8192 \
+    DS4_CUDA_Q8_F16_CACHE_MB=2048 \
     POWER_PERCENT=100 \
     WARM_WEIGHTS=0 \
     PORT=80 \

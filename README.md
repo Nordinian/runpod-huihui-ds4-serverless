@@ -2,7 +2,7 @@
 
 This repository builds a RunPod Load Balancer Serverless worker for:
 
-- Model cache: `kinson888/Huihui-DeepSeek-V4-Flash-Q2-ds4-GGUF`
+- Persistent model copy: `kinson888/Huihui-DeepSeek-V4-Flash-Q2-ds4-GGUF`
 - Source model: `huihui-ai/Huihui-DeepSeek-V4-Flash-abliterated-ds4-GGUF`
 - File: `Huihui-DeepSeek-V4-Flash-BF16-abliterated-ds4-Q2.gguf`
 - Runtime: `antirez/ds4` at commit
@@ -38,20 +38,25 @@ Use a Load Balancer endpoint with these settings:
 
 | Setting | Value |
 | --- | --- |
-| GPU priority | Server Edition, Workstation Edition, Max-Q Workstation Edition |
+| GPU pool | RTX PRO 6000 Blackwell 96GB (`BLACKWELL_96`) |
 | GPU count | 1 |
+| Data center | `EU-RO-1` |
 | Active workers | 0 |
 | Max workers | 1 |
 | Idle timeout | 1800 seconds |
 | Container disk | 32GB or more |
 | Container port | 80 |
 | Health path | `/ping` |
-| Model cache | `kinson888/Huihui-DeepSeek-V4-Flash-Q2-ds4-GGUF` |
+| Network volume | 120GB Standard, mounted at `/runpod-volume` |
+| Model path | `/runpod-volume/model/Huihui-DeepSeek-V4-Flash-BF16-abliterated-ds4-Q2.gguf` |
+| Cached models | None |
 | CUDA minimum | 12.8 |
 | Max concurrency | 1 |
 
-The model cache repository contains only the selected Q2 file. This avoids
-pre-caching the source repository's unrelated Q2_K, Q4_K, and MTP files.
+The slim Hugging Face repository contains only the selected Q2 file. Download
+it once to the Network Volume and verify its SHA256 before attaching the volume
+to the endpoint. The deployed file has SHA256
+`0abedca3dc470460fd1a5eae8e155c30f14a6584c807674bb9dff3bcf4f9f3d9`.
 
 Recommended environment variables:
 
@@ -59,9 +64,26 @@ Recommended environment variables:
 RUNPOD_INIT_TIMEOUT=1800
 CTX_SIZE=131072
 KV_DISK_SPACE_MB=8192
+DS4_CUDA_Q8_F16_CACHE_MB=2048
 WARM_WEIGHTS=0
 POWER_PERCENT=100
 ```
+
+The 2GB Q8-to-FP16 acceleration-cache cap is required for the 131,072-token
+context to fit on a 96GB GPU. It only limits an optional acceleration cache;
+uncached tensors use DS4's native Q8 kernels, so model weights and output
+quality are unchanged.
+
+## Verified deployment
+
+The validated endpoint is `qhgkcoezvsgg3u`:
+
+```text
+https://qhgkcoezvsgg3u.api.runpod.ai
+```
+
+It serves model IDs `deepseek-v4-flash` and `deepseek-v4-pro`. The final idle
+state is zero workers with `min=0`, `max=1`, and a 30-minute idle timeout.
 
 ## Verify
 
@@ -107,3 +129,8 @@ Both launchers read the RunPod token from the macOS Keychain service
 `runpod-api-key`; the secret is not stored in these files. The Codex catalog
 uses a 131,072-token context limit, compacts at 110,000 tokens, disables hidden
 reasoning by default, and keeps only the built-in coding tools.
+
+Before starting the client, each launcher probes `/v1/models` and waits up to
+30 minutes for a scale-to-zero endpoint to allocate a GPU and load the model.
+Set `HUIHUI_SKIP_WARMUP=1` to bypass this check or change the deadline with
+`HUIHUI_WARMUP_TIMEOUT_SECONDS`.

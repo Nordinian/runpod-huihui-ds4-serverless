@@ -1,5 +1,63 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+case "${1:-}" in
+    -h|--help|-v|-V|--version) exec codex "$@" ;;
+esac
+
+endpoint_url="https://qhgkcoezvsgg3u.api.runpod.ai"
+api_key="$(/usr/bin/security find-generic-password -s runpod-api-key -w)"
+skip_warmup="${HUIHUI_SKIP_WARMUP:-0}"
+
+endpoint_status() {
+    local max_time="$1"
+    /usr/bin/curl --config - 2>/dev/null <<CURL || :
+url = "${endpoint_url}/v1/models"
+header = "Authorization: Bearer ${api_key}"
+silent
+output = "/dev/null"
+write-out = "%{http_code}"
+max-time = "${max_time}"
+CURL
+}
+
+wait_for_endpoint() {
+    [[ "${skip_warmup}" == "1" ]] && return 0
+
+    local timeout="${HUIHUI_WARMUP_TIMEOUT_SECONDS:-1800}"
+    if ! [[ "${timeout}" =~ ^[0-9]+$ ]]; then
+        printf '[huihui] HUIHUI_WARMUP_TIMEOUT_SECONDS must be an integer.\n' >&2
+        return 2
+    fi
+
+    local deadline=$((SECONDS + timeout))
+    local status
+    status="$(endpoint_status 2)"
+    [[ "${status}" == "200" ]] && return 0
+    if [[ "${status}" =~ ^(401|403|404)$ ]]; then
+        printf '[huihui] Endpoint probe failed with HTTP %s; check the endpoint and RunPod key.\n' "${status}" >&2
+        return 1
+    fi
+
+    printf '[huihui] Waking the RunPod endpoint; GPU allocation and model loading can take several minutes.\n' >&2
+    while ((SECONDS < deadline)); do
+        status="$(endpoint_status 330)"
+        if [[ "${status}" == "200" ]]; then
+            printf '[huihui] Endpoint ready.\n' >&2
+            return 0
+        fi
+        if [[ "${status}" =~ ^(401|403|404)$ ]]; then
+            printf '[huihui] Endpoint probe failed with HTTP %s; check the endpoint and RunPod key.\n' "${status}" >&2
+            return 1
+        fi
+        sleep 10
+    done
+
+    printf '[huihui] Endpoint did not become ready within %s seconds.\n' "${timeout}" >&2
+    return 1
+}
+
+wait_for_endpoint
+unset api_key
 export CODEX_HOME="${CODEX_HUIHUI_HOME:-$HOME/.codex-huihui}"
 exec codex "$@"
