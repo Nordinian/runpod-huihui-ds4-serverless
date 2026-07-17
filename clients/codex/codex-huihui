@@ -32,13 +32,6 @@ wait_for_endpoint() {
 
     local deadline=$((SECONDS + timeout))
     local status
-    status="$(endpoint_status 2)"
-    [[ "${status}" == "200" ]] && return 0
-    if [[ "${status}" =~ ^(401|403|404)$ ]]; then
-        printf '[huihui] Endpoint probe failed with HTTP %s; check the endpoint and RunPod key.\n' "${status}" >&2
-        return 1
-    fi
-
     printf '[huihui] Waking the RunPod endpoint; GPU allocation and model loading can take several minutes.\n' >&2
     while ((SECONDS < deadline)); do
         status="$(endpoint_status 330)"
