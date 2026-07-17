@@ -42,19 +42,19 @@ COPY docker/nginx.conf.template /opt/ds4/nginx.conf.template
 RUN chmod 0755 /opt/ds4/ds4-server /opt/ds4/entrypoint.sh \
     && mkdir -p /var/cache/nginx /var/log/nginx /tmp/ds4-kv
 
-ENV MODEL_ID=huihui-ai/Huihui-DeepSeek-V4-Flash-abliterated-ds4-GGUF \
-    MODEL_REVISION=f06f59bce3c36b3282b75c9fe2621c83c9399d10 \
+ENV MODEL_ID=kinson888/Huihui-DeepSeek-V4-Flash-Q2-ds4-GGUF \
+    MODEL_REVISION=e97533b21a4e168c415c658c25b63a89d859e593 \
     MODEL_FILE=Huihui-DeepSeek-V4-Flash-BF16-abliterated-ds4-Q2.gguf \
     CTX_SIZE=131072 \
     KV_DISK_DIR=/tmp/ds4-kv \
     KV_DISK_SPACE_MB=8192 \
     POWER_PERCENT=100 \
-    WARM_WEIGHTS=1 \
-    PORT=8000 \
+    WARM_WEIGHTS=0 \
+    PORT=80 \
     DS4_PORT=8001 \
     RUNPOD_INIT_TIMEOUT=1800
 
-EXPOSE 8000
+EXPOSE 80
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30m --retries=3 \
     CMD curl --fail --silent --show-error http://127.0.0.1:${PORT}/ping >/dev/null || exit 1

@@ -2,7 +2,8 @@
 
 This repository builds a RunPod Load Balancer Serverless worker for:
 
-- Model: `huihui-ai/Huihui-DeepSeek-V4-Flash-abliterated-ds4-GGUF`
+- Model cache: `kinson888/Huihui-DeepSeek-V4-Flash-Q2-ds4-GGUF`
+- Source model: `huihui-ai/Huihui-DeepSeek-V4-Flash-abliterated-ds4-GGUF`
 - File: `Huihui-DeepSeek-V4-Flash-BF16-abliterated-ds4-Q2.gguf`
 - Runtime: `antirez/ds4` at commit
   `80ebbc396aee40eedc1d829222f3362d10fa4c6c`
@@ -39,15 +40,14 @@ Use a Load Balancer endpoint with these settings:
 | Max workers | 1 |
 | Idle timeout | 1800 seconds |
 | Container disk | 32GB or more |
-| Container port | 8000 |
+| Container port | 80 |
 | Health path | `/ping` |
-| Model cache | `huihui-ai/Huihui-DeepSeek-V4-Flash-abliterated-ds4-GGUF` |
+| Model cache | `kinson888/Huihui-DeepSeek-V4-Flash-Q2-ds4-GGUF` |
 | CUDA minimum | 12.8 |
 | Max concurrency | 1 |
 
-RunPod currently caches every file in a Hugging Face repository, so this model
-cache is larger than the selected Q2 file. The cache download is performed
-before worker billing begins. The worker only opens the exact Q2 file.
+The model cache repository contains only the selected Q2 file. This avoids
+pre-caching the source repository's unrelated Q2_K, Q4_K, and MTP files.
 
 Recommended environment variables:
 
@@ -55,7 +55,7 @@ Recommended environment variables:
 RUNPOD_INIT_TIMEOUT=1800
 CTX_SIZE=131072
 KV_DISK_SPACE_MB=8192
-WARM_WEIGHTS=1
+WARM_WEIGHTS=0
 POWER_PERCENT=100
 ```
 
