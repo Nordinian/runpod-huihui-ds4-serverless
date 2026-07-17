@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+api_key="$(/usr/bin/security find-generic-password -s runpod-api-key -w)"
+model="${CLAUDE_HUIHUI_MODEL:-deepseek-v4-flash}"
+export ANTHROPIC_BASE_URL="${ANTHROPIC_BASE_URL:-https://qhgkcoezvsgg3u.api.runpod.ai}"
+export ANTHROPIC_AUTH_TOKEN="$api_key"
+export ANTHROPIC_MODEL="$model"
+export CLAUDE_CONFIG_DIR="${CLAUDE_HUIHUI_HOME:-$HOME/.claude-huihui}"
+unset ANTHROPIC_API_KEY
+
+mkdir -p "$CLAUDE_CONFIG_DIR"
+exec claude --safe-mode --model "$model" "$@"

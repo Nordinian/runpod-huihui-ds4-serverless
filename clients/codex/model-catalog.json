@@ -1,0 +1,71 @@
+{
+  "models": [
+    {
+      "additional_speed_tiers": [],
+      "apply_patch_tool_type": "freeform",
+      "auto_compact_token_limit": 110000,
+      "auto_review_model_override": null,
+      "availability_nux": {
+        "message": "RunPod-hosted Huihui DeepSeek V4 Flash Q2."
+      },
+      "available_in_plans": [],
+      "base_instructions": "You are a coding agent working in the user's local workspace. Inspect the relevant files, use tools when needed, make narrowly scoped changes, verify the result, and continue until the request is complete. Preserve unrelated user changes. Keep progress updates and the final answer concise and factual. Follow project instruction files when present.",
+      "comp_hash": "huihui-ds4-q2-v1",
+      "context_window": 131072,
+      "default_reasoning_level": "minimal",
+      "default_reasoning_summary": "none",
+      "default_service_tier": null,
+      "default_verbosity": "low",
+      "description": "Huihui DeepSeek V4 Flash abliterated Q2 on RunPod.",
+      "display_name": "Huihui DeepSeek V4 Q2",
+      "experimental_supported_tools": [],
+      "include_skills_usage_instructions": false,
+      "input_modalities": [
+        "text"
+      ],
+      "max_context_window": 131072,
+      "minimal_client_version": "0.144.0",
+      "model_messages": {
+        "approvals": null,
+        "instructions_template": "You are a coding agent working in the user's local workspace. Inspect the relevant files, use tools when needed, make narrowly scoped changes, verify the result, and continue until the request is complete. Preserve unrelated user changes. Keep progress updates and the final answer concise and factual. Follow project instruction files when present.",
+        "instructions_variables": {
+          "personality_default": "",
+          "personality_friendly": "",
+          "personality_pragmatic": ""
+        }
+      },
+      "multi_agent_version": null,
+      "prefer_websockets": false,
+      "priority": 1,
+      "reasoning_summary_format": "experimental",
+      "service_tiers": [],
+      "shell_type": "shell_command",
+      "slug": "deepseek-v4-flash",
+      "support_verbosity": false,
+      "supported_in_api": true,
+      "supported_reasoning_levels": [
+        {
+          "description": "Disable hidden reasoning for lower latency.",
+          "effort": "minimal"
+        },
+        {
+          "description": "Enable normal model reasoning.",
+          "effort": "high"
+        }
+      ],
+      "supports_image_detail_original": false,
+      "supports_parallel_tool_calls": false,
+      "supports_reasoning_summaries": false,
+      "supports_search_tool": false,
+      "tool_mode": null,
+      "truncation_policy": {
+        "limit": 10000,
+        "mode": "tokens"
+      },
+      "upgrade": null,
+      "use_responses_lite": false,
+      "visibility": "list",
+      "web_search_tool_type": "text"
+    }
+  ]
+}

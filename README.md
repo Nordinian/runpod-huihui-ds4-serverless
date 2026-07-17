@@ -28,6 +28,10 @@ The worker exposes:
 `/v1/responses` is intended for Codex-compatible clients. `/v1/messages` is
 intended for Claude Code-compatible clients.
 
+The pinned DS4 source is patched to emit `response.created` before a long
+Responses prefill. Codex otherwise times out while a full agent prompt is being
+loaded on a single GPU, even though SSE comment keepalives are still arriving.
+
 ## RunPod configuration
 
 Use a Load Balancer endpoint with these settings:
@@ -79,3 +83,27 @@ RunPod authenticates requests at the Load Balancer with:
 ```text
 Authorization: Bearer RUNPOD_API_KEY
 ```
+
+RunPod's Load Balancer does not accept `x-api-key`. Claude Code must therefore
+use `ANTHROPIC_AUTH_TOKEN`, not `ANTHROPIC_API_KEY`.
+
+## Codex and Claude Code
+
+Install the isolated launchers:
+
+```bash
+./clients/install.sh
+```
+
+Then start either client without loading the much larger global plugin and MCP
+configuration:
+
+```bash
+codex-huihui
+claude-huihui
+```
+
+Both launchers read the RunPod token from the macOS Keychain service
+`runpod-api-key`; the secret is not stored in these files. The Codex catalog
+uses a 131,072-token context limit, compacts at 110,000 tokens, disables hidden
+reasoning by default, and keeps only the built-in coding tools.

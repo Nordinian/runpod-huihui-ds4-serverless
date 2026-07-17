@@ -1,0 +1,103 @@
+diff --git a/ds4_server.c b/ds4_server.c
+index 34a9d50..2643867 100644
+--- a/ds4_server.c
++++ b/ds4_server.c
+@@ -10148,6 +10148,39 @@ static void generate_job(server *s, job *j) {
+     char req_flags[64];
+     log_flags(req_flags, sizeof(req_flags), responses_protocol,
+               j->req.has_tools, false, false, false);
++    bool structured_stream = request_uses_structured_stream(&j->req);
++    anthropic_stream anthropic_live = {0};
++    openai_stream openai_live = {0};
++    responses_stream responses_live = {0};
++    const bool openai_live_chat = request_uses_openai_live_stream(&j->req);
++    const bool responses_live_chat = request_uses_responses_live_stream(&j->req);
++    long responses_created_at = (long)time(NULL);
++
++    /* Codex treats SSE comments as transport keepalives but still requires a
++     * real Responses event before its first-event timeout. Large agent prompts
++     * can spend minutes in prefill on a single GPU, so start the Responses
++     * lifecycle before syncing the prompt and keep using this stream state for
++     * generation. */
++    if (responses_live_chat) {
++        responses_stream_init(&j->req, &responses_live);
++        responses_live.active = true;
++        if (!sse_headers(j->fd, s->enable_cors) ||
++            !responses_sse_created(j->fd, &j->req, &responses_live,
++                                   responses_created_at))
++        {
++            server_log(DS4_LOG_GENERATION,
++                       "ds4-server: chat ctx=%s%s%s responses early created event failed",
++                       ctx_span,
++                       req_flags[0] ? " " : "",
++                       req_flags);
++            responses_stream_free(&responses_live);
++            ds4_tokens_free(&effective_prompt);
++            free(disk_cache_path);
++            return;
++        }
++        progress.headers_sent = true;
++        progress.last_keepalive = now_sec();
++    }
+     if (responses_live_continuation) {
+         server_log(DS4_LOG_PREFILL,
+                    "ds4-server: responses live continuation RESPPROTO match=%s ids=%d cached=%d prompt=%d",
+@@ -10235,6 +10268,7 @@ static void generate_job(server *s, job *j) {
+             free(disk_cache_path);
+             trace_event(s, trace_id, "prefill failed: %s", err);
+             send_prefill_failure_response(s, j, &progress, ctx_span, req_flags, err);
++            responses_stream_free(&responses_live);
+             return;
+         }
+         if (kv_cache_store_live_prefix(s, prompt_for_sync, cold_store_len, "cold")) {
+@@ -10258,6 +10292,7 @@ static void generate_job(server *s, job *j) {
+         free(disk_cache_path);
+         trace_event(s, trace_id, "prefill failed: %s", err);
+         send_prefill_failure_response(s, j, &progress, ctx_span, req_flags, err);
++        responses_stream_free(&responses_live);
+         return;
+     }
+     free(disk_cache_path);
+@@ -10290,13 +10325,6 @@ static void generate_job(server *s, job *j) {
+              j->req.kind == REQ_CHAT ? "chatcmpl" : "cmpl",
+              (unsigned long long)++s->seq);
+ 
+-    bool structured_stream = request_uses_structured_stream(&j->req);
+-    anthropic_stream anthropic_live = {0};
+-    openai_stream openai_live = {0};
+-    responses_stream responses_live = {0};
+-    const bool openai_live_chat = request_uses_openai_live_stream(&j->req);
+-    const bool responses_live_chat = request_uses_responses_live_stream(&j->req);
+-    long responses_created_at = (long)time(NULL);
+     if (j->req.stream) {
+         if (progress.stream_failed) {
+             server_log(DS4_LOG_GENERATION,
+@@ -10305,6 +10333,7 @@ static void generate_job(server *s, job *j) {
+                        ctx_span,
+                        req_flags[0] ? " " : "",
+                        req_flags);
++            responses_stream_free(&responses_live);
+             ds4_tokens_free(&effective_prompt);
+             return;
+         }
+@@ -10336,20 +10365,6 @@ static void generate_job(server *s, job *j) {
+             return;
+         }
+         if (openai_live_chat) openai_stream_start(&j->req, &openai_live);
+-        if (responses_live_chat) {
+-            responses_stream_init(&j->req, &responses_live);
+-            responses_live.active = true;
+-            if (!responses_sse_created(j->fd, &j->req, &responses_live, responses_created_at)) {
+-                server_log(DS4_LOG_GENERATION,
+-                           "ds4-server: chat ctx=%s%s%s responses created event failed",
+-                           ctx_span,
+-                           req_flags[0] ? " " : "",
+-                           req_flags);
+-                responses_stream_free(&responses_live);
+-                ds4_tokens_free(&effective_prompt);
+-                return;
+-            }
+-        }
+     }
+ 
+     bool dsml_recovery_attempted = false;

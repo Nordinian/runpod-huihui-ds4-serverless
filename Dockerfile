@@ -13,9 +13,11 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
+COPY patches/ds4-responses-early-created.patch /tmp/ds4-responses-early-created.patch
 RUN git clone https://github.com/antirez/ds4.git \
     && cd ds4 \
     && git checkout "${DS4_COMMIT}" \
+    && git apply /tmp/ds4-responses-early-created.patch \
     && make -B ds4-server CUDA_ARCH=sm_120 NATIVE_CPU_FLAG=-march=x86-64-v3 \
     && strip ds4-server
 

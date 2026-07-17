@@ -1,0 +1,26 @@
+model = "deepseek-v4-flash"
+model_provider = "runpod_huihui"
+model_catalog_json = "/Users/Kinson/.codex-huihui/model-catalog.json"
+model_reasoning_effort = "minimal"
+sandbox_mode = "danger-full-access"
+approval_policy = "never"
+
+[model_providers.runpod_huihui]
+name = "RunPod Huihui DeepSeek V4 Q2"
+base_url = "https://qhgkcoezvsgg3u.api.runpod.ai/v1"
+wire_api = "responses"
+supports_websockets = false
+request_max_retries = 1
+stream_max_retries = 1
+
+[model_providers.runpod_huihui.auth]
+command = "/usr/bin/security"
+args = ["find-generic-password", "-s", "runpod-api-key", "-w"]
+timeout_ms = 5000
+refresh_interval_ms = 0
+
+[projects."/Users/Kinson"]
+trust_level = "trusted"
+
+[projects."/private/tmp"]
+trust_level = "trusted"

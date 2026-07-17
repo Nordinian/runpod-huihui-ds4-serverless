@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export CODEX_HOME="${CODEX_HUIHUI_HOME:-$HOME/.codex-huihui}"
+exec codex "$@"
