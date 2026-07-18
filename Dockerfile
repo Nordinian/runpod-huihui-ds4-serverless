@@ -4,6 +4,7 @@ FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu24.04 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DS4_COMMIT=80ebbc396aee40eedc1d829222f3362d10fa4c6c
+ARG CUDA_ARCH=sm_120
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -18,7 +19,7 @@ RUN git clone https://github.com/antirez/ds4.git \
     && cd ds4 \
     && git checkout "${DS4_COMMIT}" \
     && git apply /tmp/ds4-responses-early-created.patch \
-    && make -B ds4-server CUDA_ARCH=sm_120 NATIVE_CPU_FLAG=-march=x86-64-v3 \
+    && make -B ds4-server CUDA_ARCH="${CUDA_ARCH}" NATIVE_CPU_FLAG=-march=x86-64-v3 \
     && strip ds4-server
 
 FROM nvidia/cuda:${CUDA_VERSION}-runtime-ubuntu24.04

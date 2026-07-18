@@ -50,3 +50,24 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Extract B200 image metadata
+        id: meta_b200
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=b200
+            type=sha,prefix=b200-sha-,format=long
+
+      - name: Build and push B200 image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            CUDA_ARCH=sm_100
+          tags: ${{ steps.meta_b200.outputs.tags }}
+          labels: ${{ steps.meta_b200.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
